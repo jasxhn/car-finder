@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>IndiWiki — Cars</title>
+  <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+  <header>
+    <div class="logo" style="text-align:center;">IndiWiki — Cars</div>
+
+    <div class="hero" style="margin-left:12px">
+      <img src="https://bikecarhub.com/images/blogs/2025/nov/tata%20sierra/header.webp" alt="Endavour"/>
+      <div>
+        <div style="font-weight:600">Explore Indian cars</div>
+        <div style="font-size:13px;color:var(--muted)">Browse curated pages with photos & brief summaries</div>
+      </div>
+    </div>
+
+    <div class="search">
+      <div class="controls">
+        <label for="search" style="color:var(--muted);font-size:13px">Search:</label>
+        <input id="search" type="search" placeholder="Search cars, tags or models..." oninput="filterCards()" />
+      </div>
+    </div>
+  </header>
+
+  <!-- ⭐ INTRO SECTION -->
+  <section style="max-width:900px;margin:20px auto 30px;padding:18px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:12px;">
+    <h2 style="margin:0 0 10px;font-size:22px;">Welcome to IndiWiki — Your Mini Encyclopedia of Indian Cars</h2>
+    <p style="margin:0;color:var(--muted);font-size:14px;line-height:1.6;">
+      This site is a clean, fast and distraction-free place to explore popular cars in the Indian market.
+      Every car card includes a photo, a short description, and useful tags — making it easy to browse,
+      compare and discover models without ads or clutter.
+    </p>
+  </section>
+
+  <!-- ⭐ CHOOSE CAR FOR YOU FORM -->
+  <section style="max-width:900px;margin:0 auto 30px;padding:18px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:12px;">
+    <h3 style="margin:0 0 12px;font-size:18px;">Choose a Car for You</h3>
+
+    <form id="carPicker" style="display:flex;flex-wrap:wrap;gap:12px;">
+      <select id="budget" style="padding:10px;border-radius:8px;background:var(--glass);border:1px solid rgba(255,255,255,0.06);color:#fff;">
+        <option value="">Budget</option>
+        <option value="low">₹6–10L</option>
+        <option value="mid">₹10–20L</option>
+        <option value="high">₹20L+</option>
+      </select>
+
+      <select id="type" style="padding:10px;border-radius:8px;background:var(--glass);border:1px solid rgba(255,255,255,0.06);color:#fff;">
+        <option value="">Body Type</option>
+        <option value="suv">SUV</option>
+        <option value="hatch">Hatchback</option>
+        <option value="sedan">Sedan</option>
+        <option value="offroad">Off-road</option>
+      </select>
+
+      <button type="button" onclick="suggestCar()" 
+        style="padding:10px 14px;border-radius:8px;background:var(--accent);border:none;color:#081018;font-weight:600;cursor:pointer;">
+        Suggest
+      </button>
+    </form>
+
+    <div id="suggestResult" style="margin-top:12px;color:var(--muted);font-size:14px;"></div>
+  </section>
+
+  <main>
+    <section id="list" class="grid"></section>
+
+    <div style="height:18px"></div>
+
+    <footer>
+      Built with ❤️ and 4 Hours of coding by @23-M-0899 — sample mini-wiki for Indian cars. 
+      Click a card to open the full page.
+    </footer>
+  </main>
+
+  <template id="cardTpl">
+    <article class="card" tabindex="0">
+      <img class="thumb" src="" alt="thumb" />
+      <h3></h3>
+      <p class="desc"></p>
+      <div class="tags"></div>
+    </article>
+  </template>
+
+  <script src="index.js"></script>
+
+  <!-- ⭐ Suggestion JS -->
+  <script>
+    function suggestCar() {
+      const budget = document.getElementById('budget').value;
+      const type = document.getElementById('type').value;
+
+      let suggestions = cars;
+
+      // Filter by body type
+      if (type) {
+        suggestions = suggestions.filter(c =>
+          c.tags.join(' ').toLowerCase().includes(type)
+        );
+      }
+
+      // Filter by budget (fixed)
+      if (budget) {
+        suggestions = suggestions.filter(c => {
+          const priceTag = c.tags.find(t => t.includes('₹'));
+          if (!priceTag) return false;
+
+          const match = priceTag.match(/₹(\d+)-(\d+)L/);
+          if (!match) return false;
+
+          const low = parseInt(match[1]);
+          const high = parseInt(match[2]);
+
+          if (budget === 'low') return high <= 10;
+          if (budget === 'mid') return low >= 10 && high <= 20;
+          if (budget === 'high') return low >= 20;
+
+          return true;
+        });
+      }
+
+      if (suggestions.length === 0) {
+        document.getElementById('suggestResult').textContent =
+          "No matching cars — try adjusting options.";
+        return;
+      }
+
+      const pick = suggestions[Math.floor(Math.random() * suggestions.length)];
+
+      document.getElementById('suggestResult').innerHTML =
+        `<div style="display:flex;gap:14px;align-items:flex-start;margin-top:12px;">
+          <img src="${pick.img}" style="width:200px;height:140px;object-fit:cover;border-radius:8px;flex-shrink:0;" alt="${pick.title}" />
+          <div>
+            <div style="color:#e6eef6;margin-bottom:8px;">
+              <strong style="font-size:16px;">You might like: ${pick.title}</strong>
+            </div>
+            <p style="margin:0;color:var(--muted);font-size:14px;line-height:1.5;">${pick.desc}</p>
+            <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+              ${pick.tags.map(t => `<span class="tag">${t}</span>`).join('')}
+            </div>
+          </div>
+        </div>`;
+    }
+  </script>
+
+</body>
+</html>
